@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  etl:
+    build: .
+    container_name: inca-etl
+    command: python scripts/run_etl.py
+    volumes:
+      - .:/app
+    environment:
+      - PYTHONUNBUFFERED=1
+    # Uncomment to run on a schedule (or use the scheduler script)
+    # command: python -m scripts.scheduled_etl
+
+  dashboard:
+    build: .
+    container_name: inca-dashboard
+    command: streamlit run scripts/visualize.py --server.address=0.0.0.0
+    ports:
+      - "8501:8501"
+    volumes:
+      - .:/app
+    environment:
+      - PYTHONUNBUFFERED=1
+    depends_on:
+      - etl
+
+# Usage:
+# - Run ETL: docker-compose run etl
+# - Run dashboard: docker-compose up dashboard
+# - Run both: docker-compose up
